@@ -224,7 +224,10 @@ class Schema(BaseModel, metaclass=ResolverMetaclass):
         if forbids_extra or should_validate_assignment:
             handler(values)
 
-        values = DjangoGetter(values, cls, info.context)
+        if not isinstance(values, cls):
+            # prevent DjangoGetter/resolvers from executing if the input is already of the same class
+            # (workaround for double-validation issues)
+            values = DjangoGetter(values, cls, info.context)
         return handler(values)
 
     @classmethod
