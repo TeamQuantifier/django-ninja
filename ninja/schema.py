@@ -61,9 +61,8 @@ class DjangoGetter:
     def __getattr__(self, key: str) -> Any:
         # if key.startswith("__pydantic"):
         #     return getattr(self._obj, key)
-
-        resolver = self._schema_cls._ninja_resolvers.get(key)
-        if resolver:
+        with_resolvers = (self._context or {}).get("_with_resolvers", True)
+        if with_resolvers and (resolver := self._schema_cls._ninja_resolvers.get(key)):
             value = resolver(getter=self)
         else:
             if isinstance(self._obj, dict):
